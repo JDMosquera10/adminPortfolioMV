@@ -49,8 +49,21 @@ namespace adminProfolio.Services
             }
         }
 
+        // Método para validar el formato de email
+        private void ValidarFormatoEmail(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                throw new ArgumentException("El email es requerido.");
+
+            // Expresión regular simple para validar email
+            var regex = new System.Text.RegularExpressions.Regex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$");
+            if (!regex.IsMatch(email))
+                throw new ArgumentException("El formato del email es inválido.");
+        }
+
         public async Task<Usuario> CrearAsync(CreateUserDto parameters)
         {
+            ValidarFormatoEmail(parameters.email); // Validar formato de email
             ValidarPasswordSegura(parameters.password); // Validar antes de crear
 
             Usuario usuario = new Usuario(parameters);
@@ -95,6 +108,7 @@ namespace adminProfolio.Services
 
             if (!string.IsNullOrWhiteSpace(dto.email) && dto.email != usuario.email)
             {
+                ValidarFormatoEmail(dto.email); // Validar formato de email
                 var emailExistente = await _usuarios.Find(u => u.email == dto.email).FirstOrDefaultAsync();
                 if (emailExistente != null)
                 {

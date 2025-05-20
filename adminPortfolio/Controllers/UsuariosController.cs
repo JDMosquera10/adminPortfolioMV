@@ -41,7 +41,7 @@ namespace adminProfolio.Controllers
             }
             catch (ArgumentException ex)
             {
-                // Error de validación de contraseña insegura
+                // Error de validación de contraseña o email
                 return BadRequest(new { error = ex.Message });
             }
         }
@@ -99,7 +99,7 @@ namespace adminProfolio.Controllers
             }
             catch (ArgumentException ex)
             {
-                // Error de validación de contraseña insegura
+                // Error de validación de contraseña o email
                 return BadRequest(new { error = ex.Message });
             }
         }
