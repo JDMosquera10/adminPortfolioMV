@@ -1,4 +1,4 @@
-namespace adminPortfolio
+namespace adminportfolio
 {
     public class WeatherForecast
     {

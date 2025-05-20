@@ -1,6 +1,6 @@
-@adminPortfolio_HostAddress = http://localhost:5174
+@adminportfolio_HostAddress = http://localhost:5098
 
-GET {{adminPortfolio_HostAddress}}/weatherforecast/
+GET {{adminportfolio_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###
