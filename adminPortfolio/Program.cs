@@ -58,6 +58,7 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization();
 builder.Services.AddScoped<UsuarioService>();
 builder.Services.AddScoped<ConfiguracionService>();
+builder.Services.AddScoped<ComponenteService>();
 builder.Services.AddScoped<EmailService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
