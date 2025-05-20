@@ -21,7 +21,7 @@ namespace adminProfolio.Models
         public string refresh_token { get; set; } = null!;
 
         [BsonElement("phone_number")]
-        public double? phone_number { get; set; } = null;
+        public long? phone_number { get; set; } = null;
 
         [BsonElement("fullname")]
         public string fullname { get; set; } = null!;
@@ -36,7 +36,7 @@ namespace adminProfolio.Models
         public Usuario(CreateUserDto parameter)
         {
            this.fullname = parameter.fullname;
-            this.email = parameter.email;
+            this.email = parameter.email.ToLower();
             this.password = parameter.password;
             this.phone_number = parameter.phone_number;
         }

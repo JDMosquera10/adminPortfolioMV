@@ -34,13 +34,30 @@ namespace adminProfolio.Services
             return await _usuarios.Find(u => u.email == email.ToLower()).FirstOrDefaultAsync();
         }
 
+        // Método para validar la seguridad de la contraseña
+        private void ValidarPasswordSegura(string password)
+        {
+            // Ejemplo: mínimo 8 caracteres, al menos una mayúscula, una minúscula, un número y un caracter especial
+            if (string.IsNullOrWhiteSpace(password) ||
+                password.Length < 8 ||
+                !password.Any(char.IsUpper) ||
+                !password.Any(char.IsLower) ||
+                !password.Any(char.IsDigit) ||
+                !password.Any(c => !char.IsLetterOrDigit(c)))
+            {
+                throw new ArgumentException("La contraseña debe tener al menos 8 caracteres, incluir mayúsculas, minúsculas, números y un caracter especial.");
+            }
+        }
+
         public async Task<Usuario> CrearAsync(CreateUserDto parameters)
         {
+            ValidarPasswordSegura(parameters.password); // Validar antes de crear
 
             Usuario usuario = new Usuario(parameters);
-            usuario.email = usuario.email.ToLower();
             usuario.password = BCrypt.Net.BCrypt.HashPassword(usuario.password);
+
             var codigoVerificacion = new Random().Next(100000, 999999).ToString();
+
             usuario.VerificationCode = codigoVerificacion;
             usuario.VerificationCodeExpires = DateTime.UtcNow.AddMinutes(5);
 
@@ -89,12 +106,13 @@ namespace adminProfolio.Services
 
             if (!string.IsNullOrEmpty(dto.Password))
             {
+                ValidarPasswordSegura(dto.Password); // Validar antes de actualizar
                 usuario.password = BCrypt.Net.BCrypt.HashPassword(dto.Password);
             }
 
             if (!string.IsNullOrEmpty(dto.fullname)) usuario.fullname = dto.fullname;
             if (!string.IsNullOrEmpty(dto.email)) usuario.email = dto.email;
-            if (dto.phone_number.HasValue) usuario.phone_number = dto.phone_number.Value;
+            if (dto.phone_number.HasValue) usuario.phone_number = dto.phone_number;
 
             await _usuarios.ReplaceOneAsync(u => u.Id == id, usuario);
 
@@ -121,6 +139,8 @@ namespace adminProfolio.Services
             {
                 throw new UnauthorizedAccessException("La contraseña actual es incorrecta.");
             }
+
+            ValidarPasswordSegura(dto.NewPassword); // Validar antes de cambiar
 
             usuario.password = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
 
