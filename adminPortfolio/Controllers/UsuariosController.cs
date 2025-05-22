@@ -29,21 +29,13 @@ namespace adminProfolio.Controllers
         [HttpPost]
         public async Task<IActionResult> CrearAsync(CreateUserDto usuario)
         {
-            try
+            var existe = await _usuarioService.ObtenerPorEmailAsync(usuario.email);
+            if (existe != null)
             {
-                var existe = await _usuarioService.ObtenerPorEmailAsync(usuario.email);
-                if (existe != null)
-                {
-                    return Conflict("Email ya registrado.");
-                }
-                await _usuarioService.CrearAsync(usuario);
-                return CreatedAtAction(nameof(ObtenerTodos), new { id = usuario.Id }, usuario);
+                return Conflict("Email o número de teléfono ya están registrados.");
             }
-            catch (ArgumentException ex)
-            {
-                // Error de validación de contraseña o email
-                return BadRequest(new { error = ex.Message });
-            }
+            await _usuarioService.CrearAsync(usuario);
+            return CreatedAtAction(nameof(ObtenerTodos), new { id = usuario.Id }, usuario);
         }
 
         [AllowAnonymous] // se deja sin la autenticación ya que es necesario para le registro del usuario
@@ -97,11 +89,6 @@ namespace adminProfolio.Controllers
             {
                 return Conflict(new { error = ex.Message });
             }
-            catch (ArgumentException ex)
-            {
-                // Error de validación de contraseña o email
-                return BadRequest(new { error = ex.Message });
-            }
         }
 
         [HttpDelete("{id}")]
@@ -131,11 +118,6 @@ namespace adminProfolio.Controllers
             catch (UnauthorizedAccessException ex)
             {
                 return Unauthorized(new { error = ex.Message });
-            }
-            catch (ArgumentException ex)
-            {
-                // Error de validación de contraseña insegura
-                return BadRequest(new { error = ex.Message });
             }
         }
 

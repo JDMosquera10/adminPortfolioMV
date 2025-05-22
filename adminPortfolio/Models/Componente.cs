@@ -6,33 +6,17 @@ namespace adminportfolio.Models
 {
     public class Componente
     {
-        [BsonId]
+        [BsonId]  
         [BsonRepresentation(BsonType.ObjectId)]
         public string? Id { get; set; }
 
-        [BsonElement("title")]
-        public required string Title { get; set; }
+        [BsonElement("type")]
+        public required string Type { get; set; }
 
-        [BsonElement("description")]
-        public required string Description { get; set; }
+        [BsonElement("identifier")]
+        public required string Identifier { get; set; }
 
-        [BsonElement("component")]
-        public required string Component { get; set; }
-
-        [BsonElement("componentIdentifier")]
-        public required string ComponentIdentifier { get; set; }
-
-        [BsonElement("componentType")]
-        public required string ComponentType { get; set; }
-
-        [BsonElement("componentVersion")]
-        public required string ComponentVersion { get; set; }
-
-
-        [BsonElement("loadDataAction")]
-        public string? LoadDataAction { get; set; }
-
-        [BsonElement("actions")]
-        public List<string>? Actions { get; set; }
+        [BsonElement("props_json")]
+        public BsonDocument? Props_json { get; set; }
     }
 }

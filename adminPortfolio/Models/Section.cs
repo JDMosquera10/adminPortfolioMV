@@ -9,43 +9,51 @@ namespace adminportfolio.Models
         [BsonElement("Order")]
         public int Order { get; set; }
 
-        [BsonElement("identifier")]
+        [BsonElement("Identifier")]
         public required string Identifier { get; set; }
 
-        [BsonElement("type")]
+        [BsonElement("Type")]
         public required string Type { get; set; }
 
-        [BsonElement("title")]
+        [BsonElement("Title")]
         public string? Title { get; set; } = null!;
 
-        [BsonElement("idecomponente_identifierntifier")]
+        [BsonElement("Componente_identifier")]
         public string? Componente_identifier { get; set; } = null!;
 
+        [BsonElement("contentData")]
+        public BsonDocument? ContentData { get; set; }
 
-        [BsonElement("renderClient")]
-        public bool? RenderClient { get; set; } =  null!;
+        [BsonElement("RenderClient")]
+        [BsonRepresentation(BsonType.Boolean)]
+        public bool? RenderClient { get; set; } =  false;
 
-        [BsonElement("content")]
-        public Content? Content { get; set; } = null!;
+        [BsonElement("Content")]
+        public List<Content>? Content { get; set; } = null!;
 
-
-        [BsonElement("isNavbar")]
-        public bool? IsNavbar { get; set; }
+        [BsonElement("IsNavbar")]
+        [BsonRepresentation(BsonType.Boolean)]
+        public bool? IsNavbar { get; set; } = false;
 
     }
 
     public class Content
     {
-        [BsonElement("position")]
+        [BsonElement("Position")]
         public required string Position { get; set; }
 
-        [BsonElement("isHidden")]
-        public bool? IsHidden { get; set; }
+        [BsonElement("IsHidden")]
+        [BsonRepresentation(BsonType.Boolean)]
+        public bool? IsHidden { get; set; } = false;
 
-        [BsonElement("stuffed")]
-        public bool? Stuffed { get; set; }
+        [BsonElement("Stuffed")]
+        [BsonRepresentation(BsonType.Boolean)]
+        public bool? Stuffed { get; set; } = false;
 
-        [BsonElement("componente_identifier")]
+        [BsonElement("contentData")]
+        public BsonDocument? ContentData { get; set; }
+
+        [BsonElement("ComponenteIdentifier")]
         public required string ComponenteIdentifier { get; set; }
     }
 

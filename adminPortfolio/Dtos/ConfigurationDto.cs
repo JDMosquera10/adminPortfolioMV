@@ -3,6 +3,7 @@
     public class ConfigurationDto
     {
         public string UserId { get; set; } = string.Empty;
-        public SectionsDto Sections { get; set; }
+
+        public List<SectionsDto> Sections { get; set; } = new List<SectionsDto>();
     }
 }
