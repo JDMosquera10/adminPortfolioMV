@@ -12,7 +12,7 @@ namespace adminportfolio.Dtos
         public string? Title { get; set; } = string.Empty;
         public string? Componente_identifier { get; set; } = string.Empty;
         public bool? RenderClient { get; set; } = false;
-        public ContentDto? Content { get; set; } = null;
+        public List<ContentDto>? Content { get; set; } = null;
         public bool? IsNavbar { get; set; } = false;
 
     }
@@ -23,5 +23,6 @@ namespace adminportfolio.Dtos
         public bool? IsHidden { get; set; } = false;
         public bool? Stuffed { get; set; } = false;
         public string componenteIdentifier { get; set; } = string.Empty;
+        public string type { get; set; } = string.Empty;
     }
 }

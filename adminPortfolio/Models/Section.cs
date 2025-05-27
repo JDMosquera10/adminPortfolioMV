@@ -55,6 +55,9 @@ namespace adminportfolio.Models
 
         [BsonElement("ComponenteIdentifier")]
         public required string ComponenteIdentifier { get; set; }
+
+        [BsonElement("type")]
+        public required string type { get; set; }
     }
 
 }

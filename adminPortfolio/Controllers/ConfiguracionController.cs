@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using MongoDB.Bson;
+using System.Security.Claims;
 using System.Text.Json;
 
 namespace adminportfolio.Controllers
@@ -23,6 +24,7 @@ namespace adminportfolio.Controllers
 
         [HttpGet]
         [AllowAnonymous]
+        [Authorize(Roles = "Admin,User")]
         public async Task<ActionResult<List<ConfigurationDto>>> Get()
         {
             var configuraciones = await _service.GetAsync();
@@ -42,13 +44,14 @@ namespace adminportfolio.Controllers
                     Title = s.Title,
                     Componente_identifier = s.Componente_identifier,
                     RenderClient = s.RenderClient,
-                    Content = s.Content?.FirstOrDefault() != null ? new ContentDto
+                    Content = s.Content?.Select(c => new ContentDto
                     {
-                        Position = s.Content.FirstOrDefault().Position,
-                        IsHidden = s.Content.FirstOrDefault().IsHidden,
-                        Stuffed = s.Content.FirstOrDefault().Stuffed,
-                        componenteIdentifier = s.Content.FirstOrDefault().ComponenteIdentifier
-                    } : null, // Fix: Properly map Content to ContentDto
+                        Position = c.Position,
+                        IsHidden = c.IsHidden, 
+                        Stuffed = c.Stuffed,
+                        componenteIdentifier = c.ComponenteIdentifier,
+                        type = c.type
+                    }).ToList(), // Fix: Properly map Content to ContentDto
                     IsNavbar = s.IsNavbar
                 }).ToList()
             }).ToList();
@@ -58,15 +61,40 @@ namespace adminportfolio.Controllers
 
         [HttpGet("{userId}")]
         [AllowAnonymous]
-        public async Task<ActionResult<Configuracion>> GetByUserId(string userId)
+        [Authorize(Roles = "Admin,User")]
+        public async Task<ActionResult<ConfigurationDto>> GetByUserId(string userId)
         {
             var config = await _service.GetByUserIdAsync(userId);
             if (config is null) return NotFound();
-            return config;
+
+            var configuracionDtos = new ConfigurationDto
+            {
+                UserId = config.UserId,
+                Sections = config.Sections.Select(s => new SectionsDto
+                {
+                    Order = s.Order,
+                    fullname = s.Identifier,
+                    Type = s.Type,
+                    Title = s.Title,
+                    Componente_identifier = s.Componente_identifier,
+                    RenderClient = s.RenderClient,
+                    Content = s.Content?.Select(c => new ContentDto
+                    {
+                        Position = c.Position,
+                        IsHidden = c.IsHidden,
+                        Stuffed = c.Stuffed,
+                        componenteIdentifier = c.ComponenteIdentifier,
+                        type = c.type
+                    }).ToList(), // Fix: Properly map Content to ContentDto
+                    IsNavbar = s.IsNavbar
+                }).ToList()
+            };
+            return Ok(configuracionDtos);
         }
 
         [HttpGet("getconfig/{userId}")]
         [AllowAnonymous]
+        [Authorize(Roles = "Admin,User")]
         public async Task<ActionResult<ConfiguracionGeneralDto>> GetConfigData(string userId)
         {
             var config = await _service.GetConfigDataWithComponentes(userId);
@@ -97,7 +125,8 @@ namespace adminportfolio.Controllers
                             ? JsonDocument.Parse(c.ContentData.ToJson()).RootElement 
                             : null,
                         Stuffed = c.Stuffed,
-                        componenteIdentifier = c.ComponenteIdentifier
+                        componenteIdentifier = c.ComponenteIdentifier,
+                        type = c.type
                     }).ToList(),
                     IsNavbar = s.IsNavbar
                 }).ToList()
@@ -107,8 +136,19 @@ namespace adminportfolio.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create(ConfigurationDto dto)
         {
+            try
+            {
+                // Obtener el ID del usuario del token
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized(new { error = "Usuario no autenticado" });
+            }
+            // Asignar el ID del usuario autenticado a la configuración
+            dto.UserId = userId;
             // Map SectionsDto to List<Section>
             var sections = dto.Sections.Select(s => new Section
             {
@@ -119,16 +159,14 @@ namespace adminportfolio.Controllers
                 Title = s.Title,
                 Componente_identifier = s.Componente_identifier,
                 RenderClient = s.RenderClient,
-                Content = s.Content != null ? new List<Content> // Fix: Ensure Content is mapped to a List<Content>
+                Content = s.Content?.Select(c => new Content // Fix: Ensure Content is mapped to a List<Content>
                 {
-                    new Content
-                    {
-                        Position = s.Content.Position,
-                        IsHidden = s.Content.IsHidden,
-                        Stuffed = s.Content.Stuffed,
-                        ComponenteIdentifier = s.Content.componenteIdentifier
-                    }
-                } : null,
+                    Position = c.Position,
+                    IsHidden = c.IsHidden,
+                    Stuffed = c.Stuffed,
+                    ComponenteIdentifier = c.componenteIdentifier,
+                    type = c.type
+                }).ToList(),
                 IsNavbar = s.IsNavbar
             }).ToList();
 
@@ -149,13 +187,14 @@ namespace adminportfolio.Controllers
                 Title = s.Title,
                 Componente_identifier = s.Componente_identifier,
                 RenderClient = s.RenderClient,
-                Content = s.Content?.FirstOrDefault() != null ? new ContentDto
+                Content = s.Content?.Select(c => new ContentDto
                 {
-                    Position = s.Content.FirstOrDefault().Position,
-                    IsHidden = s.Content.FirstOrDefault().IsHidden,
-                    Stuffed = s.Content.FirstOrDefault().Stuffed,
-                    componenteIdentifier = s.Content.FirstOrDefault().ComponenteIdentifier
-                } : null, // Fix: Properly map Content to ContentDto
+                    Position = c.Position,
+                    IsHidden = c.IsHidden,
+                    Stuffed = c.Stuffed,
+                    componenteIdentifier = c.ComponenteIdentifier,
+                    type = c.type
+                }).ToList(),
                 IsNavbar = s.IsNavbar
             }).ToList();
 
@@ -166,9 +205,15 @@ namespace adminportfolio.Controllers
             };
 
             return CreatedAtAction(nameof(GetByUserId), new { userId = configuracion.UserId }, configuracionResult);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized(new { error = "No autorizado" });
+            }
         }
 
         [HttpPost("{userId}/sections")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AddSection(string userId, [FromBody] Section section)
         {
             var success = await _service.AddSectionAsync(userId, section);
@@ -177,10 +222,51 @@ namespace adminportfolio.Controllers
         }
 
         [HttpPut("{userId}")]
-        public async Task<IActionResult> Update(string userId, Configuracion configuracion)
+        [Authorize(Roles = "Admin,User")]
+        public async Task<IActionResult> Update(string userId, ConfigurationDto dto)
         {
             var existing = await _service.GetByUserIdAsync(userId);
             if (existing is null) return NotFound();
+
+            var userIdLogguer = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            // Obtener el ID del usuario del token
+            if (string.IsNullOrEmpty(userIdLogguer))
+            {
+                return Unauthorized(new { error = "Usuario no autenticado" });
+            }
+            if(userIdLogguer != userId)
+            {
+                return Unauthorized(new { error = "estas editando la parametria de otro usuario" });
+            }
+
+            // Asignar el ID del usuario autenticado a la configuración
+            dto.UserId = userIdLogguer;
+            // Map SectionsDto to List<Section>
+            var sections = dto.Sections.Select(s => new Section
+            {
+                Order = s.Order,
+                Identifier = s.fullname, // Assuming fullname maps to Identifier
+                Type = s.Type,
+                ContentData = null, // Fix: Convert JsonElement? to string before parsing
+                Title = s.Title,
+                Componente_identifier = s.Componente_identifier,
+                RenderClient = s.RenderClient,
+                Content = s.Content?.Select(c => new Content // Fix: Ensure Content is mapped to a List<Content>
+                {
+                    Position = c.Position,
+                    IsHidden = c.IsHidden,
+                    Stuffed = c.Stuffed,
+                    ComponenteIdentifier = c.componenteIdentifier,
+                    type = c.type
+                }).ToList(),
+                IsNavbar = s.IsNavbar
+            }).ToList();
+
+            var configuracion = new Configuracion
+            {
+                UserId = dto.UserId,
+                Sections = sections
+            };
 
             configuracion.UserId = userId;
             configuracion.Id = existing.Id;
@@ -189,6 +275,7 @@ namespace adminportfolio.Controllers
         }
 
         [HttpDelete("{userId}")]
+        [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> Delete(string userId)
         {
             var existing = await _service.GetByUserIdAsync(userId);

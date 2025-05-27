@@ -148,7 +148,9 @@ namespace adminProfolio.Services
             if (!passwordValid)
                 throw new UnauthorizedAccessException("Credenciales inválidas");
 
-            var (accessToken, refreshToken) = await _tokenService.GetTokensAsync(user.Id, user.email, "Admin");
+            var role = user.role ?? "User";
+
+            var (accessToken, refreshToken) = await _tokenService.GetTokensAsync(user.Id, user.email, role);
 
             var codigoVerificacion = new Random().Next(100000, 999999).ToString();
             user.VerificationCode = codigoVerificacion;

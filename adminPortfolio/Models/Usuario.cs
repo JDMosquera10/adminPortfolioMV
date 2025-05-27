@@ -17,6 +17,9 @@ namespace adminProfolio.Models
         [BsonElement("Password")]
         public string password { get; set; } = null!;
 
+        [BsonElement("role")]
+        public string role { get; set; } = null!;
+
         [BsonElement("refresh_token")]
         public string refresh_token { get; set; } = null!;
 
@@ -39,6 +42,7 @@ namespace adminProfolio.Models
             this.email = parameter.email;
             this.password = parameter.password;
             this.phone_number = parameter.phone_number;
+            this.role = parameter.role;
         }
     }
 }

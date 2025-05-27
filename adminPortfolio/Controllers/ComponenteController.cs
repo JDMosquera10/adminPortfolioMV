@@ -4,6 +4,7 @@ using adminportfolio.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
+using System.Security.Claims;
 using System.Text.Json;
 
 namespace adminportfolio.Controllers
@@ -21,6 +22,7 @@ namespace adminportfolio.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<List<ComponenteDto>>> Get()
         {
             var componentes = await _service.GetAsync();
@@ -38,6 +40,7 @@ namespace adminportfolio.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<ComponenteDto>> GetById(string id)
         {
             var componente = await _service.GetByIdAsync(id);
@@ -57,8 +60,10 @@ namespace adminportfolio.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create(ComponenteDto dto)
         {
+           
             var componente = new Componente
             {
                 Id = dto.Id,
@@ -83,6 +88,7 @@ namespace adminportfolio.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(string id, ComponenteDto dto)
         {
             var existing = await _service.GetByIdAsync(id);
@@ -103,6 +109,7 @@ namespace adminportfolio.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(string id)
         {
             var existing = await _service.GetByIdAsync(id);

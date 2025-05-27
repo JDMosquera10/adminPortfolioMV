@@ -16,8 +16,7 @@ namespace adminportfolio.Dtos
         public string Type { get; set; } = string.Empty;
         public string? Title { get; set; } = string.Empty;
         public string? Componente_identifier { get; set; } = string.Empty;
-
-        public JsonElement? contentData { get; set; }
+        public JsonElement? contentData { get; set; } = null;
         public bool? RenderClient { get; set; } = false;
         public List<ContentDtoGeneral>? Contents { get; set; } = null;
         public bool? IsNavbar { get; set; } = false;
@@ -27,9 +26,9 @@ namespace adminportfolio.Dtos
     {
         public string Position { get; set; } = string.Empty;
         public bool? IsHidden { get; set; } = false;
-
-        public JsonElement? contentData { get; set; }
+        public JsonElement? contentData { get; set; } = null;
         public bool? Stuffed { get; set; } = false;
         public string componenteIdentifier { get; set; } = string.Empty;
+        public string type { get; set; } = string.Empty;
     }
 }

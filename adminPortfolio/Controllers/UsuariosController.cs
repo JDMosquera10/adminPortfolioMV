@@ -19,6 +19,7 @@ namespace adminProfolio.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> ObtenerTodos()
         {
             var usuarios = await _usuarioService.ObtenerTodosAsync();
@@ -75,6 +76,7 @@ namespace adminProfolio.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> ActualizarUsuario(string id, [FromBody] UpdateUserDto dto)
         {
             try
@@ -92,6 +94,7 @@ namespace adminProfolio.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> EliminarUsuario(string id)
         {
             var eliminado = await _usuarioService.EliminarAsync(id);
